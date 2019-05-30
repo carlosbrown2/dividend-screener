@@ -1,0 +1,10 @@
+Minimum Dividend Yield (%)
+3.0
+Minimum Chowder Rule (%)
+8
+Maximum P/E
+25
+Maximum Payout (%)
+75
+Maximum Debt/Equity (%/100)
+0.7
