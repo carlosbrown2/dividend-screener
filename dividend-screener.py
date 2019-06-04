@@ -10,9 +10,9 @@ import pandas as pd
 from numpy import nan
 import yfinance as yf
 import requests
-import time
+import datetime
 
-start = time.time()
+start = datetime.datetime.now()
 
 #import screen criteria
 settings = pd.read_csv('dividend_settings.txt',)
@@ -23,6 +23,7 @@ maxpayout = float(settings.iloc[6])
 maxdebt = float(settings.iloc[8])
 
 print('Downloading Dividend Champions Sheet...\n')
+
 #obtain latest copy of USDividendChampions
 url = 'https://bitly.com/USDividendChampions'
 file = requests.get(url)
@@ -31,7 +32,8 @@ with open('DividendChampions.xlsx','wb') as d:
     d.write(file.content)
     
 print('Processing Dividend Champions Spreadsheet...\n')
-#read data
+
+#read in the dividend stock data
 filename = 'DividendChampions.xlsx'
 df1 = pd.read_excel(filename,sheet_name='Champions')
 df2 = pd.read_excel(filename,sheet_name='Contenders')
@@ -49,16 +51,19 @@ for df in df_list:
 df = pd.concat(df_list)
 print('Total # of Stocks considered:',df.shape[0],'\n')
       
-#features of interest
+#convert datatype for columns of interest
 scr_col = ['Div.Yield','EPS %Payout','Debt/Equity','TTM P/E','Chowder Rule','DGR 1-yr','DGR 3-yr','DGR 5-yr','DGR 10-yr','5/10 A/D*']
 for col in scr_col:
     df[col] = df[col].astype(float)
 
 print('Fetching latest stock prices...\n')
-#latest stock price
+
+#get latest stock price
 ticker_list = list(df.Ticker)
-dat = yf.download(ticker_list,start='2019-05-29',end='2019-05-30',group_by='ticker')
-#manipulate df and add new pricing columns
+quote_date = start.strftime('%Y-%m-%d')
+dat = yf.download(ticker_list,start=quote_date,end=quote_date,group_by='ticker')
+
+#melt returned df
 df_dat = dat.melt()
 #drop date with nan values
 df_dat.dropna(inplace=True)
@@ -73,15 +78,16 @@ def fiveten(r):
         return ans
     except:
         return nan
-        
 df['5/10 A/D*'] = df.apply(lambda row: fiveten(row),axis=1)
 
 #screen stocks by yield, chowder rule, EPS, and debt/equity
 evalexp = (df['Div.Yield'] > mindiv) & (df['Chowder Rule'] > minchowder) & (df['EPS %Payout'] < maxpayout) & (df['Debt/Equity'] < maxdebt)
 df_screen = df[evalexp].sort_values(by='Div.Yield',ascending=False)
+
 #Adjust dividend yield and price based on current up-to-date price
 df_screen['Div.Yield'] = df_screen.apply(lambda row: row['Div.Yield']*row['Close']/row['Price'],axis=1)
 df_screen['P/E'] = df_screen.apply(lambda row: row['TTM P/E']*row['Close']/row['Price'],axis=1)
+
 #add feature for 1 year DGR over 3 yr DGR
 df_screen['1/3 A/D'] = df_screen['DGR 1-yr'] / df_screen['DGR 3-yr']
 
@@ -91,8 +97,8 @@ print('# Industries:',len(df_screen['Industry'].unique()))
 print('')
 print(df_screen[['Company','Ticker','Div.Yield','No.Yrs','5/10 A/D*','EPS %Payout','Debt/Equity','P/E','Close']].head(15).sort_values(by='Div.Yield',ascending=False))
 
-#save full screen list for further analysis if desired
+#save screen list for further analysis if desired
 df_screen.to_excel('DividendScreenList.xlsx')
-total_time = round(time.time()-start,2)
-print('Program Run time (s):',total_time)
-print('Program Run time (m):',round(total_time/60,2))
+elapsed = datetime.datetime.now()-start
+print('Program Run time (s):',elapsed.seconds)
+print('Program Run time (m):',round(elapsed.seconds/60,2))
