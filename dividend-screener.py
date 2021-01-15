@@ -5,7 +5,7 @@ Dividend Champions/Contenders/Challengers Analysis
 By: CAB
 
 """
-
+### CREATE VIRTUAL ENVIRONMENT ###
 import pandas as pd
 from numpy import nan
 import yfinance as yf
@@ -24,6 +24,7 @@ maxdebt = float(settings.iloc[8])
 
 print('Downloading Dividend Champions Sheet...\n')
 
+### READ DIRECTLY WITH PANDAS ###
 #obtain latest copy of USDividendChampions
 url = 'https://bitly.com/USDividendChampions'
 file = requests.get(url)
@@ -59,10 +60,13 @@ for col in scr_col:
 print('Fetching latest stock prices...\n')
 
 #get latest stock price
-ticker_list = list(df.Ticker)
+ticker_list = list(df.Ticker.unique())
+ticker_list_clean = [ticker for ticker in ticker_list if isinstance(ticker, str)]
 quote_date = start.strftime('%Y-%m-%d')
-dat = yf.download(ticker_list,start=quote_date,end=quote_date,group_by='ticker')
-
+start_date = start - datetime.timedelta(days=1)
+print(quote_date, start_date)
+dat = yf.download(ticker_list_clean,start=start_date,end=quote_date,group_by='ticker')
+print(dat.info())
 #melt returned df
 df_dat = dat.melt()
 #drop date with nan values
@@ -70,7 +74,7 @@ df_dat.dropna(inplace=True)
 #use Open, Close, etc as columns, no multi-index
 df_dat = df_dat.pivot(index='variable_0',columns='variable_1',values='value')
 df = df.merge(right=df_dat,how='left',left_on='Ticker',right_on=df_dat.index)
-
+print(df.columns)
 #calculate 5/10 A/D* for missing values
 def fiveten(r):
     try:
