@@ -12,6 +12,12 @@ import yfinance as yf
 import requests
 import datetime
 import funcs
+import dash
+import dash_html_components as html
+import dash_core_components as dcc
+import plotly.express as px
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
 
 start = datetime.datetime.now()
 
@@ -53,10 +59,10 @@ dat = yf.download(ticker_list_clean,start=start_date,end=quote_date,group_by='ti
 
 # Melt returned df
 df_dat = dat.melt()
-#drop date with nan values
+# Drop rows with nan values
 df_dat.dropna(inplace=True)
-#use Open, Close, etc as columns, no multi-index
-df_dat = df_dat.pivot(index='variable_0',columns='variable_1',values='value')
+# Use Open, Close, etc as columns, no multi-index
+df_dat = pd.pivot_table(df_dat, index='variable_0', columns='variable_1', values='value', aggfunc='mean')
 df = df.merge(right=df_dat,how='left',left_on='Ticker',right_on=df_dat.index)
 
 df['5/10 A/D*'] = df.apply(lambda row: funcs.fiveten(row),axis=1)
@@ -75,8 +81,14 @@ print('')
 print(df[['Company','Ticker','Div.Yield','No.Yrs','5/10 A/D*','EPS %Payout',
             'Debt/Equity','P/E','Close']].head(15).sort_values(by='Div.Yield',ascending=False))
 
-#save screen list for further analysis if desired
-df.to_excel('DividendScreenList.xlsx')
-elapsed = datetime.datetime.now()-start
-print('Program Run time (s):',elapsed.seconds)
-print('Program Run time (m):',round(elapsed.seconds/60,2))
+fig = px.scatter(df, x='Div.Yield', y='Debt/Equity', color='Industry', hover_data=['Ticker'])
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app.layout = html.Div(children=[
+    html.H1(children='Welcome to the ...'),
+    html.Div(children='Dividend Dashboard'),
+    dcc.Graph(id='example-graph',figure=fig)
+    ]
+)
+if __name__ == '__main__':
+    app.run_server(debug=True, port=8050)
