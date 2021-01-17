@@ -15,7 +15,9 @@ import funcs
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import plotly.express as px
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
@@ -78,17 +80,48 @@ print('***Summary of Eligible Stocks***')
 print('Number of Stocks:',df.shape[0])
 print('# Industries:',len(df['Industry'].unique()))
 print('')
-print(df[['Company','Ticker','Div.Yield','No.Yrs','5/10 A/D*','EPS %Payout',
-            'Debt/Equity','P/E','Close']].head(15).sort_values(by='Div.Yield',ascending=False))
 
-fig = px.scatter(df, x='Div.Yield', y='Debt/Equity', color='Industry', hover_data=['Ticker'])
+fig_scatter = px.scatter(df, x='Div.Yield', y='Debt/Equity', color='Industry', hover_data=['Ticker'])
+fig_hist_yield = px.histogram(df, x='Div.Yield')
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB])
 app.layout = html.Div(children=[
     html.H1(children='Welcome to the ...'),
     html.Div(children='Dividend Dashboard'),
-    dcc.Graph(id='example-graph',figure=fig)
-    ]
-)
+    dbc.Row([
+        dbc.Col(dcc.Graph(id='example-graph',figure=fig_scatter), width=8),
+        dbc.Col([
+            dbc.Row([
+                    dbc.Card(
+                    [
+                        dbc.CardHeader('Dividend Yields'),
+                        dbc.CardBody(
+                        [
+                            html.Div('text filler')
+                        ])
+                    ],
+                    outline=True)
+            ]),
+            dbc.Row([
+                    dbc.Card(
+                    [
+                        dbc.CardHeader('Card Title'),
+                        dbc.CardBody(
+                        [
+                            html.P(
+                                "Some quick example text to build on the card title and "
+                                "make up the bulk of the card's content.",
+                                className="card-text",
+                            ),
+                        ])
+                    ],
+                    outline=True)
+                ])
+            ], width=4)
+    ]),
+    dcc.Graph(figure=fig_hist_yield),
+])
+
+
 if __name__ == '__main__':
     app.run_server(debug=True, port=8050)
