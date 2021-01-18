@@ -17,6 +17,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import plotly.express as px
+from static import dropdown, company_name
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -55,12 +56,12 @@ print('Fetching latest stock prices...\n')
 ticker_list = list(df.Ticker.unique())
 ticker_list_clean = [ticker for ticker in ticker_list if isinstance(ticker, str)]
 quote_date = start.strftime('%Y-%m-%d')
-start_date = start - datetime.timedelta(days=1)
+start_date = start - datetime.timedelta(days=7)
 print(quote_date, start_date)
 dat = yf.download(ticker_list_clean,start=start_date,end=quote_date,group_by='ticker')
-
+print(dat)
 # Melt returned df
-df_dat = dat.melt()
+df_dat = dat.iloc[[-1]].melt()
 # Drop rows with nan values
 df_dat.dropna(inplace=True)
 # Use Open, Close, etc as columns, no multi-index
@@ -83,43 +84,39 @@ print('')
 
 fig_scatter = px.scatter(df, x='Div.Yield', y='Debt/Equity', color='Industry', hover_data=['Ticker'])
 fig_hist_yield = px.histogram(df, x='Div.Yield')
+scatter_graph = dcc.Graph(figure=fig_scatter)
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB])
 app.layout = html.Div(children=[
-    html.H1(children='Welcome to the ...'),
-    html.Div(children='Dividend Dashboard'),
+    html.H1(children='Dividend Dashboard'),
     dbc.Row([
-        dbc.Col(dcc.Graph(id='example-graph',figure=fig_scatter), width=8),
+        dbc.Col(dropdown),#Ticker selector
         dbc.Col([
-            dbc.Row([
-                    dbc.Card(
-                    [
-                        dbc.CardHeader('Dividend Yields'),
-                        dbc.CardBody(
-                        [
-                            html.Div('text filler')
-                        ])
-                    ],
-                    outline=True)
-            ]),
-            dbc.Row([
-                    dbc.Card(
-                    [
-                        dbc.CardHeader('Card Title'),
-                        dbc.CardBody(
-                        [
-                            html.P(
-                                "Some quick example text to build on the card title and "
-                                "make up the bulk of the card's content.",
-                                className="card-text",
-                            ),
-                        ])
-                    ],
-                    outline=True)
-                ])
-            ], width=4)
+            html.Div(company_name),
+            html.Div(company_name),
+            html.Div(company_name),
+        ], className='colstyle'),# Company name column
+        dbc.Col([
+            html.Div(company_name),
+            html.Div(company_name),
+            html.Div(company_name),
+        ], className='colstyle') # Recessions Survived column
     ]),
-    dcc.Graph(figure=fig_hist_yield),
+    dbc.Row([
+        dbc.Col(company_name), # Div. Yield
+        dbc.Col(company_name), # P/E
+        dbc.Col(company_name), # Chowder Rule
+        dbc.Col(company_name), # 5/10 AGR
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dbc.Row(company_name),
+            dbc.Row(company_name),
+        ]), # Stacked cards
+        dbc.Col([
+            scatter_graph
+        ], width=8), # Price Charts
+    ])
 ])
 
 
