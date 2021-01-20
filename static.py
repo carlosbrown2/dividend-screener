@@ -23,3 +23,65 @@ company_name = dbc.Card(
         ])
     ],
     outline=True)
+
+divyield = dbc.Card(
+    [
+        dbc.CardHeader('Yield'),
+        dbc.CardBody(
+        [
+            html.Div('text filler')
+        ])
+    ],
+    outline=True)
+
+pe = dbc.Card(
+    [
+        dbc.CardHeader('P/E'),
+        dbc.CardBody(
+        [
+            html.Div('text filler')
+        ])
+    ],
+    outline=True)
+
+chowder = dbc.Card(
+    [
+        dbc.CardHeader('Chowder'),
+        dbc.CardBody(
+        [
+            html.Div('text filler')
+        ])
+    ],
+    outline=True)
+
+fiveten = dbc.Card(
+    [
+        dbc.CardHeader('5/10 AGR'),
+        dbc.CardBody(
+        [
+            html.Div('text filler')
+        ])
+    ],
+    outline=True)
+
+debtequity = dbc.Card(
+    [
+        dbc.CardHeader('Debt/Equity'),
+        dbc.CardBody(
+        [
+            html.Div('text filler')
+        ])
+    ],
+    outline=True,
+    className='debtequity')
+
+payout = dbc.Card(
+    [
+        dbc.CardHeader('% Payout'),
+        dbc.CardBody(
+        [
+            html.Div('text filler')
+        ])
+    ],
+    outline=True,
+    className='payout')

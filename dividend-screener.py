@@ -17,8 +17,8 @@ import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from static import dropdown, company_name
-
+from static import dropdown, company_name, divyield, pe, chowder, fiveten
+from static import debtequity, payout
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
@@ -92,32 +92,32 @@ app.layout = html.Div(children=[
     dbc.Row([
         dbc.Col(dropdown),#Ticker selector
         dbc.Col([
-            html.Div(company_name),
-            html.Div(company_name),
-            html.Div(company_name),
-        ], className='colstyle'),# Company name column
+            html.Div('company_name'),
+            html.Div('company_name'),
+            html.Div('company_name'),
+        ]),# Company name column
         dbc.Col([
-            html.Div(company_name),
-            html.Div(company_name),
-            html.Div(company_name),
-        ], className='colstyle') # Recessions Survived column
+            html.Div('company_name'),
+            html.Div('company_name'),
+            html.Div('company_name'),
+        ]) # Recessions Survived column
+    ], className='dropdownrow'),
+    dbc.Row([
+        dbc.Col(divyield, className='divyield'), # Div. Yield
+        dbc.Col(pe, className='fourrowcard_center'), # P/E
+        dbc.Col(chowder, className='fourrowcard_center'), # Chowder Rule
+        dbc.Col(fiveten, className='fiveten'), # 5/10 AGR
     ]),
     dbc.Row([
-        dbc.Col(company_name), # Div. Yield
-        dbc.Col(company_name), # P/E
-        dbc.Col(company_name), # Chowder Rule
-        dbc.Col(company_name), # 5/10 AGR
-    ]),
-    dbc.Row([
         dbc.Col([
-            dbc.Row(company_name),
-            dbc.Row(company_name),
-        ]), # Stacked cards
+            debtequity,
+            payout,
+        ], className='graphcards'), # Stacked cards
         dbc.Col([
             scatter_graph
-        ], width=8), # Price Charts
-    ])
-])
+        ], width=9), # Price Charts
+    ], justify='end')
+], className='content')
 
 
 if __name__ == '__main__':
