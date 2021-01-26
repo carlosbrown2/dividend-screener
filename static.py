@@ -2,7 +2,9 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
+import plotly.express as px
 
+getstocks = html.Button('Click Me', id='getstocks')
 
 dropdown = dcc.Dropdown(
         id='dropdown',
@@ -29,7 +31,7 @@ divyield = dbc.Card(
         dbc.CardHeader('Yield'),
         dbc.CardBody(
         [
-            html.Div('text filler')
+            html.Div(id='yield-div', children='')
         ])
     ],
     outline=True)
@@ -85,3 +87,6 @@ payout = dbc.Card(
     ],
     outline=True,
     className='payout')
+
+fig_scatter = px.scatter()
+scatter_graph = dcc.Graph(id='scatter', figure=fig_scatter)
