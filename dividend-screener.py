@@ -101,13 +101,13 @@ def get_stocks(n_clicks):
     print(quote_date, start_date)
     dat = yf.download(ticker_list_clean,start=start_date,end=quote_date,group_by='ticker')
     # Melt returned df
-    df_dat = dat.iloc[[-1]].melt()
+    df_dat = dat.iloc[[-2]].melt()
     # Drop rows with nan values
     df_dat.dropna(inplace=True)
     # Use Open, Close, etc as columns, no multi-index
     df_dat = pd.pivot_table(df_dat, index='variable_0', columns='variable_1', values='value', aggfunc='mean')
-    df_all = df.merge(right=df_dat,how='left',left_on='Ticker',right_on=df_dat.index)
-
+    
+    df = df.merge(right=df_dat,how='left',left_on='Ticker',right_on=df_dat.index)
     df['5/10 A/D*'] = df.apply(lambda row: funcs.fiveten(row),axis=1)
 
     # Adjust dividend yield and price based on current up-to-date price
@@ -116,8 +116,10 @@ def get_stocks(n_clicks):
 
     # Add feature for 1 year DGR over 3 yr DGR
     df['1/3 A/D'] = df['DGR 1-yr'] / df['DGR 3-yr']
+    df = df.dropna(subset=['Company', 'Ticker', 'Div.Yield', 'Debt/Equity'])
     ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
-    return json.dumps(ticker_dict), df_all.to_json(orient='records')
+    
+    return ticker_dict, df.to_json(orient='records')
 
 @app.callback(Output('yield-div', 'children'),
                 Input('dropdown', 'value'),
@@ -137,7 +139,7 @@ def update_scatter(data):
     if data is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(json.loads(data))
-    fig_scatter = px.scatter(df, x='Div.Yield', y='Debt/Equity', color='Industry', hover_data=['Ticker'])
+    fig_scatter = px.scatter(df, x='Div.Yield', y='Debt/Equity', color='Industry', hover_data=['Company', 'Ticker'])
     return fig_scatter
 
 # @app.callback(Output(),
