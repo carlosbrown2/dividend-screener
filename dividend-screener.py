@@ -121,7 +121,8 @@ def get_stocks(n_clicks):
     
     return ticker_dict, df.to_json(orient='records')
 
-@app.callback(Output('yield-div', 'children'),
+@app.callback([Output('yield-div', 'children'), Output('pe-div', 'children'), Output('chowder-div', 'children'),
+                Output('fiveten-div', 'children'), Output('debtequity-div', 'children'), Output('payout-div', 'children')],
                 Input('dropdown', 'value'),
                 State('stocks', 'data'))
 def update_cards(ticker, data):
@@ -129,8 +130,14 @@ def update_cards(ticker, data):
     if data is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(json.loads(data))
-    divyield = df.loc[df.Ticker == ticker, 'Div.Yield']
-    return divyield
+    divyield_ret = df.loc[df.Ticker == ticker, 'Div.Yield'].round(2).values + '%'
+    pe_ret = df.loc[df.Ticker == ticker, 'P/E'].round(2)
+    chowder_ret = df.loc[df.Ticker == ticker, 'Chowder Rule'].round(2)
+    fiveten_ret = df.loc[df.Ticker == ticker, '5/10 A/D*'].round(2)
+    debtequity_ret = df.loc[df.Ticker == ticker, 'Debt/Equity'].round(2)
+    payout_ret = df.loc[df.Ticker == ticker, 'EPS %Payout'].round(2)
+
+    return divyield_ret, pe_ret, chowder_ret, fiveten_ret, debtequity_ret, payout_ret
 
 @app.callback(Output('scatter', 'figure'),
             Input('stocks', 'data'))
