@@ -6,15 +6,10 @@ import plotly.express as px
 
 getstocks = html.Button('Click Me', id='getstocks')
 
-dropdown = dcc.Dropdown(
+dropdown = dcc.Loading(dcc.Dropdown(
         id='dropdown',
-        options=[
-            {'label': 'New York City', 'value': 'NYC'},
-            {'label': 'Montreal', 'value': 'MTL'},
-            {'label': 'San Francisco', 'value': 'SF'}
-        ],
-        value='NYC'
     )
+)
 
 company_name = dbc.Card(
     [

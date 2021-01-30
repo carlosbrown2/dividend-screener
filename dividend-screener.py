@@ -116,9 +116,22 @@ def get_stocks(n_clicks):
 
     # Add feature for 1 year DGR over 3 yr DGR
     df['1/3 A/D'] = df['DGR 1-yr'] / df['DGR 3-yr']
-    df = df.dropna(subset=['Company', 'Ticker', 'Div.Yield', 'Debt/Equity'])
-    ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
     
+    # Remove non-string Tickers
+    exclude_list = ['Averages for All', 'Communication Services', 'Consumer Discretionary', 'Consumer Staples', 'Energy']
+    df = df.loc[~df.Company.isin(exclude_list), :]
+    # Reduce length of Industry name
+    industry_map_dict = {'Mortgage Real Estate Investment Trusts (REITS)':'Mortgage REITS',
+                        'Independent Power and Renewable Electricity Producers': 'Ind. Power and Renew. Electricity Producers',
+                        'Electronic Equipment, Instruments, and Components': 'Elec. Equip., Instruments, Components'}
+    key_list = list(industry_map_dict.keys())
+    # df.Industry = df.Industry.map(industry_map_dict)
+    df.Industry = df.Industry.apply(lambda x: industry_map_dict.get(x) if x in key_list else x)
+    
+    # Drop NA values
+    df = df.dropna(subset=['Company', 'Ticker'])
+    ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
+    df.to_csv('inspection.csv')
     return ticker_dict, df.to_json(orient='records')
 
 @app.callback([Output('yield-div', 'children'), Output('pe-div', 'children'), Output('chowder-div', 'children'),
@@ -130,7 +143,7 @@ def update_cards(ticker, data):
     if data is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(json.loads(data))
-    divyield_ret = df.loc[df.Ticker == ticker, 'Div.Yield'].round(2).values + '%'
+    divyield_ret = df.loc[df.Ticker == ticker, 'Div.Yield'].round(2).values
     pe_ret = df.loc[df.Ticker == ticker, 'P/E'].round(2)
     chowder_ret = df.loc[df.Ticker == ticker, 'Chowder Rule'].round(2)
     fiveten_ret = df.loc[df.Ticker == ticker, '5/10 A/D*'].round(2)
