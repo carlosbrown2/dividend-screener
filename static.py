@@ -26,7 +26,7 @@ divyield = dbc.Card(
         dbc.CardHeader('Yield'),
         dbc.CardBody(
         [
-            html.Div(id='yield-div', children='')
+            html.Div(id='yield-div', children=' ')
         ])
     ],
     outline=True)
@@ -36,7 +36,7 @@ pe = dbc.Card(
         dbc.CardHeader('P/E'),
         dbc.CardBody(
         [
-            html.Div(id='pe-div', children='')
+            html.Div(id='pe-div', children=' ')
         ])
     ],
     outline=True)
@@ -46,7 +46,7 @@ chowder = dbc.Card(
         dbc.CardHeader('Chowder'),
         dbc.CardBody(
         [
-            html.Div(id='chowder-div', children='')
+            html.Div(id='chowder-div', children=' ')
         ])
     ],
     outline=True)
@@ -56,7 +56,7 @@ fiveten = dbc.Card(
         dbc.CardHeader('5/10 A/D'),
         dbc.CardBody(
         [
-            html.Div(id='fiveten-div', children='')
+            html.Div(id='fiveten-div', children=' ')
         ])
     ],
     outline=True)
@@ -66,7 +66,7 @@ debtequity = dbc.Card(
         dbc.CardHeader('Debt/Equity'),
         dbc.CardBody(
         [
-            html.Div(id='debtequity-div', children='')
+            html.Div(id='debtequity-div', children=' ')
         ])
     ],
     outline=True,
@@ -77,7 +77,7 @@ payout = dbc.Card(
         dbc.CardHeader('% Payout'),
         dbc.CardBody(
         [
-            html.Div(id='payout-div', children='')
+            html.Div(id='payout-div', children=' ')
         ])
     ],
     outline=True,

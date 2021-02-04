@@ -40,9 +40,9 @@ app.layout = html.Div(children=[
             dropdown, # ticker selector
         ]),
         dbc.Col([
-            html.Div('company_name'),
-            html.Div('company_name'),
-            html.Div('company_name'),
+            html.Span([html.Label('Sector:'), html.Div(id='sector-div', children='text')]),
+            html.Span([html.Label('Industry:'), html.Div(id='industry-div', children='text')]),
+            html.Span([html.Label('No Yrs:'), html.Div(id='noyrs-div', children='text')]),
         ]),# Company name column
         dbc.Col([
             html.Div('company_name'),
@@ -71,7 +71,8 @@ app.layout = html.Div(children=[
                 Input('getstocks', 'n_clicks'))
 def get_stocks(n_clicks):
     '''Grabs spreadsheet and latest prices'''
-    if n_clicks is None:
+    ctx = dash.callback_context
+    if n_clicks is None or ctx.triggered[0].get('value') is None:
         raise PreventUpdate
     mindiv = 3.0
     minchowder = 8
@@ -135,12 +136,14 @@ def get_stocks(n_clicks):
     return ticker_dict, df.to_json(orient='records')
 
 @app.callback([Output('yield-div', 'children'), Output('pe-div', 'children'), Output('chowder-div', 'children'),
-                Output('fiveten-div', 'children'), Output('debtequity-div', 'children'), Output('payout-div', 'children')],
+                Output('fiveten-div', 'children'), Output('debtequity-div', 'children'), Output('payout-div', 'children'),
+                Output('sector-div', 'children'), Output('industry-div', 'children'), Output('noyrs-div', 'children')],
                 Input('dropdown', 'value'),
                 State('stocks', 'data'))
 def update_cards(ticker, data):
     '''Update cards based on dropdown selection'''
-    if data is None:
+    ctx = dash.callback_context
+    if data is None or ctx.triggered[0].get('value') is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(json.loads(data))
     divyield_ret = df.loc[df.Ticker == ticker, 'Div.Yield'].round(2).values
@@ -149,8 +152,12 @@ def update_cards(ticker, data):
     fiveten_ret = df.loc[df.Ticker == ticker, '5/10 A/D*'].round(2)
     debtequity_ret = df.loc[df.Ticker == ticker, 'Debt/Equity'].round(2)
     payout_ret = df.loc[df.Ticker == ticker, 'EPS %Payout'].round(2)
+    sector_ret = df.loc[df.Ticker == ticker, 'Sector']
+    industry_ret = df.loc[df.Ticker == ticker, 'Industry']
+    noyrs_ret = df.loc[df.Ticker == ticker, 'No.Yrs']
 
-    return divyield_ret, pe_ret, chowder_ret, fiveten_ret, debtequity_ret, payout_ret
+    return divyield_ret, pe_ret, chowder_ret, fiveten_ret, \
+        debtequity_ret, payout_ret, sector_ret, industry_ret, noyrs_ret
 
 @app.callback(Output('scatter', 'figure'),
             Input('stocks', 'data'))
