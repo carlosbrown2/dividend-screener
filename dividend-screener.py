@@ -40,16 +40,16 @@ app.layout = html.Div(children=[
             dropdown, # ticker selector
         ]),
         dbc.Col([
-            html.Span([html.Label('Sector:'), html.Div(id='sector-div', children='text')]),
-            html.Span([html.Label('Industry:'), html.Div(id='industry-div', children='text')]),
-            html.Span([html.Label('No Yrs:'), html.Div(id='noyrs-div', children='text')]),
-        ]),# Company name column
-        dbc.Col([
-            html.Div('company_name'),
-            html.Div('company_name'),
-            html.Div('company_name'),
+            html.Div('pe filter'),
+            html.Div('div yield filter'),
+            html.Div('% payout filter'),
         ]) # Recessions Survived column
     ], className='dropdownrow'),
+    dbc.Row([
+        dbc.Col(html.Div(children='Sector : {}'.format(''), id='sector-div')),
+        dbc.Col(html.Div(children='Industry : {}'.format(''), id='industry-div')),
+        dbc.Col(html.Div(children='No Yrs : {}'.format(''), id='noyrs-div')),
+    ]),
     dbc.Row([
         dbc.Col(divyield, className='divyield'), # Div. Yield
         dbc.Col(pe, className='fourrowcard_center'), # P/E
@@ -152,9 +152,9 @@ def update_cards(ticker, data):
     fiveten_ret = df.loc[df.Ticker == ticker, '5/10 A/D*'].round(2)
     debtequity_ret = df.loc[df.Ticker == ticker, 'Debt/Equity'].round(2)
     payout_ret = df.loc[df.Ticker == ticker, 'EPS %Payout'].round(2)
-    sector_ret = df.loc[df.Ticker == ticker, 'Sector']
-    industry_ret = df.loc[df.Ticker == ticker, 'Industry']
-    noyrs_ret = df.loc[df.Ticker == ticker, 'No.Yrs']
+    sector_ret = 'Sector : {}'.format(df.loc[df.Ticker == ticker, 'Sector'].values[0])
+    industry_ret = 'Industry : {}'.format(df.loc[df.Ticker == ticker, 'Industry'].values[0])
+    noyrs_ret = 'No. Yrs : {}'.format(df.loc[df.Ticker == ticker, 'No.Yrs'].values[0])
 
     return divyield_ret, pe_ret, chowder_ret, fiveten_ret, \
         debtequity_ret, payout_ret, sector_ret, industry_ret, noyrs_ret
@@ -166,7 +166,7 @@ def update_scatter(data):
     if data is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(json.loads(data))
-    fig_scatter = px.scatter(df, x='Div.Yield', y='Debt/Equity', color='Industry', hover_data=['Company', 'Ticker'])
+    fig_scatter = px.scatter(df, x='No.Yrs', y='Div.Yield', color='Industry', hover_data=['Company', 'Ticker'])
     return fig_scatter
 
 # @app.callback(Output(),
