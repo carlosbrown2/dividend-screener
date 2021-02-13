@@ -64,7 +64,10 @@ app.layout = html.Div(children=[
         dbc.Col([
             scatter_graph
         ], width=9), # Price Charts
-    ], justify='end')
+    ], justify='end'),
+    html.H5('Data Sources'),
+    html.Div('DRIP Dividend Champions Spreadsheet'),
+    html.Div('Yahoo Finance')
 ], className='content')
 
 @app.callback([Output('dropdown', 'options'), Output('stocks', 'data')],
@@ -94,26 +97,7 @@ def get_stocks(n_clicks):
     print('Total # of Screened Stocks considered:',df.shape[0],'\n')
     print('Fetching latest stock prices...\n')
 
-    #get latest stock price
-    ticker_list = list(df.Ticker.unique())
-    ticker_list_clean = [ticker for ticker in ticker_list if isinstance(ticker, str)]
-    quote_date = start.strftime('%Y-%m-%d')
-    start_date = start - datetime.timedelta(days=7)
-    print(quote_date, start_date)
-    dat = yf.download(ticker_list_clean,start=start_date,end=quote_date,group_by='ticker')
-    # Melt returned df
-    df_dat = dat.iloc[[-2]].melt()
-    # Drop rows with nan values
-    df_dat.dropna(inplace=True)
-    # Use Open, Close, etc as columns, no multi-index
-    df_dat = pd.pivot_table(df_dat, index='variable_0', columns='variable_1', values='value', aggfunc='mean')
-    
-    df = df.merge(right=df_dat,how='left',left_on='Ticker',right_on=df_dat.index)
     df['5/10 A/D*'] = df.apply(lambda row: funcs.fiveten(row),axis=1)
-
-    # Adjust dividend yield and price based on current up-to-date price
-    df['Div.Yield'] = df.apply(lambda row: row['Div.Yield']*row['Close']/row['Price'],axis=1)
-    df['P/E'] = df.apply(lambda row: row['TTM P/E']*row['Close']/row['Price'],axis=1)
 
     # Add feature for 1 year DGR over 3 yr DGR
     df['1/3 A/D'] = df['DGR 1-yr'] / df['DGR 3-yr']
@@ -131,6 +115,9 @@ def get_stocks(n_clicks):
     
     # Drop NA values
     df = df.dropna(subset=['Company', 'Ticker'])
+    # Add new columns
+    df = df.assign(updated = False)
+    df['P/E'] = 0
     ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
     df.to_csv('inspection.csv')
     return ticker_dict, df.to_json(orient='records')
@@ -145,7 +132,30 @@ def update_cards(ticker, data):
     ctx = dash.callback_context
     if data is None or ctx.triggered[0].get('value') is None:
         raise PreventUpdate
+    # check that stock price has been retrieved already
     df = pd.DataFrame.from_dict(json.loads(data))
+    
+    # Get latest stock price
+    ticker_list = [ticker]
+    ticker_list_clean = [ticker for ticker in ticker_list if isinstance(ticker, str)]
+
+    quote_date = start.strftime('%Y-%m-%d')
+    start_date = start - datetime.timedelta(days=7)
+    
+    print('Quote date is {}'.format(quote_date))
+    print('Start date is {}'.format(start_date))
+    # Get price data
+    dat = yf.download(ticker_list_clean, start=start_date, end=quote_date, group_by='ticker')
+    # df_dat = dat.iloc[[-2]].melt()
+    # Drop rows with nan values
+    dat.dropna(inplace=True)
+    # df_dat = pd.pivot_table(df_dat, index='variable_0', columns='variable_1', values='value', aggfunc='mean')
+    # Adjust dividend yield and price based on current up-to-date price
+    df.loc[df.Ticker == ticker, 'Div.Yield'] = df.loc[df.Ticker == ticker, 'Div.Yield']*dat.loc[dat.index[-1], 'Close']/df.loc[df.Ticker == ticker, 'Price']
+    df.loc[df.Ticker == ticker, 'P/E'] = df.loc[df.Ticker == ticker, 'TTM P/E']*dat.loc[dat.index[-1], 'Close']/df.loc[df.Ticker == ticker, 'Price']
+    # df['P/E'] = df.apply(lambda row: row['TTM P/E']*row['Close']/row['Price'],axis=1)
+    # df.loc[df.Ticker == ticker, 'updated'] = True
+        
     divyield_ret = df.loc[df.Ticker == ticker, 'Div.Yield'].round(2).values
     pe_ret = df.loc[df.Ticker == ticker, 'P/E'].round(2)
     chowder_ret = df.loc[df.Ticker == ticker, 'Chowder Rule'].round(2)

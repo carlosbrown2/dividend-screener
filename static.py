@@ -4,7 +4,7 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-getstocks = html.Button('Click Me', id='getstocks')
+getstocks = html.Button('Retrieve Stock Data', id='getstocks')
 
 dropdown = dcc.Loading(dcc.Dropdown(
         id='dropdown',
@@ -23,7 +23,7 @@ company_name = dbc.Card(
 
 divyield = dbc.Card(
     [
-        dbc.CardHeader('Yield'),
+        dbc.CardHeader('% Yield'),
         dbc.CardBody(
         [
             html.Div(id='yield-div', children=' ')
