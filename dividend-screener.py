@@ -40,9 +40,31 @@ app.layout = html.Div(children=[
             dropdown, # ticker selector
         ]),
         dbc.Col([
-            html.Div('pe filter'),
-            html.Div('div yield filter'),
-            html.Div('% payout filter'),
+            dbc.Row([
+                html.Div('Minimum Yield %   '),
+                dcc.Input(
+                    id="minyield",
+                    type='number',
+                    # placeholder="Minimum Yield %",
+                    value=2.0
+                ),
+            ]),
+            dbc.Row([
+                html.Div('Max Payout %   '),
+                dcc.Input(
+                    id="maxpayout",
+                    type='number',
+                    value=60
+                ),
+            ]),
+            dbc.Row([
+                html.Div('Max Debt/Equity %   '),
+                dcc.Input(
+                    id="maxdebt",
+                    type='number',
+                    value=75
+                ),
+            ]),
         ]) # Recessions Survived column
     ], className='dropdownrow'),
     dbc.Row([
@@ -70,7 +92,7 @@ app.layout = html.Div(children=[
     html.Div('Yahoo Finance')
 ], className='content')
 
-@app.callback([Output('dropdown', 'options'), Output('stocks', 'data')],
+@app.callback([Output('stocks', 'data')],
                 Input('getstocks', 'n_clicks'))
 def get_stocks(n_clicks):
     '''Grabs spreadsheet and latest prices'''
@@ -118,9 +140,8 @@ def get_stocks(n_clicks):
     # Add new columns
     df = df.assign(updated = False)
     df['P/E'] = 0
-    ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
     df.to_csv('inspection.csv')
-    return ticker_dict, df.to_json(orient='records')
+    return df.to_json(orient='records')
 
 @app.callback([Output('yield-div', 'children'), Output('pe-div', 'children'), Output('chowder-div', 'children'),
                 Output('fiveten-div', 'children'), Output('debtequity-div', 'children'), Output('payout-div', 'children'),
@@ -178,6 +199,21 @@ def update_scatter(data):
     df = pd.DataFrame.from_dict(json.loads(data))
     fig_scatter = px.scatter(df, x='No.Yrs', y='Div.Yield', color='Industry', hover_data=['Company', 'Ticker'])
     return fig_scatter
+
+@app.callback(Output('dropdown', 'options'),
+                [Input('minyield', 'value'),
+                Input('maxdebt', 'value'),
+                Input('maxpayout', 'value'),
+                Input('stocks', 'data')])
+def update_dropdown(minyield, maxdebt, maxpayout, data):
+    '''Update dropdown on stock retrieval or update to filters'''
+    if data is None:
+        raise PreventUpdate
+    df = pd.read_json(data, orient='records')
+
+    df = df.loc[(df['Div.Yield']>minyield) & (df['EPS %Payout']<maxpayout) & (df['Debt/Equity']<maxdebt/100),:]
+    ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
+    return ticker_dict
 
 # @app.callback(Output(),
 #             [Input(), Input(), Input()])
