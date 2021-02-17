@@ -21,7 +21,7 @@ from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
 import plotly.express as px
 from static import dropdown, company_name, divyield, pe, chowder, fiveten
-from static import debtequity, payout, getstocks, scatter_graph
+from static import debtequity, payout, getstocks, scatter_graph, inside
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
@@ -40,32 +40,29 @@ app.layout = html.Div(children=[
             dropdown, # ticker selector
         ]),
         dbc.Col([
-            dbc.Row([
-                html.Div('Minimum Yield %   '),
-                dcc.Input(
+                html.Div('Minimum Yield % '),
+                html.Div('Max Payout % ', className='titlespacer'),
+                html.Div('Max Debt/Equity % ', className='titlespacer')
+        ], className='inputtitles'),
+        dbc.Col([
+            dcc.Input(
                     id="minyield",
                     type='number',
                     # placeholder="Minimum Yield %",
                     value=2.0
                 ),
-            ]),
-            dbc.Row([
-                html.Div('Max Payout %   '),
-                dcc.Input(
+            dcc.Input(
                     id="maxpayout",
                     type='number',
                     value=60
                 ),
-            ]),
-            dbc.Row([
-                html.Div('Max Debt/Equity %   '),
-                dcc.Input(
+            dcc.Input(
                     id="maxdebt",
                     type='number',
                     value=75
-                ),
-            ]),
-        ]) # Recessions Survived column
+                )
+            
+        ], className='filtertitles') # Recessions Survived column
     ], className='dropdownrow'),
     dbc.Row([
         dbc.Col(html.Div(children='Sector : {}'.format(''), id='sector-div')),
@@ -82,6 +79,7 @@ app.layout = html.Div(children=[
         dbc.Col([
             debtequity,
             payout,
+            inside
         ], className='graphcards'), # Stacked cards
         dbc.Col([
             scatter_graph
@@ -92,19 +90,13 @@ app.layout = html.Div(children=[
     html.Div('Yahoo Finance')
 ], className='content')
 
-@app.callback([Output('stocks', 'data')],
+@app.callback(Output('stocks', 'data'),
                 Input('getstocks', 'n_clicks'))
 def get_stocks(n_clicks):
     '''Grabs spreadsheet and latest prices'''
     ctx = dash.callback_context
     if n_clicks is None or ctx.triggered[0].get('value') is None:
         raise PreventUpdate
-    mindiv = 3.0
-    minchowder = 8
-    maxpe = 25
-    maxpayout = 75
-    maxdebt = 0.7
-
 
     url = 'https://bitly.com/USDividendChampions'
     sheets = ['Champions', 'Contenders', 'Challengers']
@@ -145,7 +137,8 @@ def get_stocks(n_clicks):
 
 @app.callback([Output('yield-div', 'children'), Output('pe-div', 'children'), Output('chowder-div', 'children'),
                 Output('fiveten-div', 'children'), Output('debtequity-div', 'children'), Output('payout-div', 'children'),
-                Output('sector-div', 'children'), Output('industry-div', 'children'), Output('noyrs-div', 'children')],
+                Output('sector-div', 'children'), Output('industry-div', 'children'), Output('noyrs-div', 'children'),
+                Output('inside-div', 'children')],
                 Input('dropdown', 'value'),
                 State('stocks', 'data'))
 def update_cards(ticker, data):
@@ -183,12 +176,14 @@ def update_cards(ticker, data):
     fiveten_ret = df.loc[df.Ticker == ticker, '5/10 A/D*'].round(2)
     debtequity_ret = df.loc[df.Ticker == ticker, 'Debt/Equity'].round(2)
     payout_ret = df.loc[df.Ticker == ticker, 'EPS %Payout'].round(2)
+    inside_ret = df.loc[df.Ticker == ticker, 'Inside Own.']
     sector_ret = 'Sector : {}'.format(df.loc[df.Ticker == ticker, 'Sector'].values[0])
     industry_ret = 'Industry : {}'.format(df.loc[df.Ticker == ticker, 'Industry'].values[0])
     noyrs_ret = 'No. Yrs : {}'.format(df.loc[df.Ticker == ticker, 'No.Yrs'].values[0])
 
     return divyield_ret, pe_ret, chowder_ret, fiveten_ret, \
-        debtequity_ret, payout_ret, sector_ret, industry_ret, noyrs_ret
+        debtequity_ret, payout_ret, sector_ret, industry_ret, noyrs_ret, inside_ret
+
 
 @app.callback(Output('scatter', 'figure'),
             Input('stocks', 'data'))
@@ -199,6 +194,7 @@ def update_scatter(data):
     df = pd.DataFrame.from_dict(json.loads(data))
     fig_scatter = px.scatter(df, x='No.Yrs', y='Div.Yield', color='Industry', hover_data=['Company', 'Ticker'])
     return fig_scatter
+
 
 @app.callback(Output('dropdown', 'options'),
                 [Input('minyield', 'value'),

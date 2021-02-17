@@ -38,3 +38,18 @@
     margin-top: 1rem;
     padding: 0;
 }
+
+.inputtitles {
+    margin-left: 0rem;
+    padding: 0rem;
+    text-align: right;
+}
+
+.filterinputs {
+    padding-left: 0rem;
+    margin-left: 0rem;
+}
+
+.titlespacer {
+    margin: 0.5rem;
+}

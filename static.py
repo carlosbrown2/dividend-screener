@@ -83,5 +83,17 @@ payout = dbc.Card(
     outline=True,
     className='payout')
 
+
+inside = dbc.Card(
+    [
+        dbc.CardHeader('Inside Ownership'),
+        dbc.CardBody(
+        [
+            html.Div(id='inside-div', children=' ')
+        ])
+    ],
+    outline=True,
+    className='payout')
+
 fig_scatter = px.scatter()
 scatter_graph = dcc.Graph(id='scatter', figure=fig_scatter)
