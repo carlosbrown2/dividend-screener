@@ -31,6 +31,7 @@ start = datetime.datetime.now()
 ### Save data to dcc.Store
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB])
+server = app.server
 app.layout = html.Div(children=[
     dcc.Store(id='stocks', storage_type='session'),
     html.H1(children='Dividend Dashboard'),
@@ -44,22 +45,25 @@ app.layout = html.Div(children=[
                 html.Div('Max Payout % ', className='titlespacer'),
                 html.Div('Max Debt/Equity % ', className='titlespacer')
         ], className='inputtitles'),
-        dbc.Col([
+        html.Div([
             dcc.Input(
                     id="minyield",
                     type='number',
                     # placeholder="Minimum Yield %",
-                    value=2.0
+                    value=2.0,
+                    className='inputs'
                 ),
             dcc.Input(
                     id="maxpayout",
                     type='number',
-                    value=60
+                    value=60,
+                    className='inputs'
                 ),
             dcc.Input(
                     id="maxdebt",
                     type='number',
-                    value=75
+                    value=75,
+                    className='inputs'
                 )
             
         ], className='filtertitles') # Recessions Survived column

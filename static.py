@@ -4,7 +4,7 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-getstocks = html.Button('Retrieve Stock Data', id='getstocks')
+getstocks = html.Button('Retrieve Stock Data', id='getstocks', className='button')
 
 dropdown = dcc.Loading(dcc.Dropdown(
         id='dropdown',
