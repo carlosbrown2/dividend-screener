@@ -221,4 +221,4 @@ def update_dropdown(minyield, maxdebt, maxpayout, data):
 #     '''Update outputs based on filter changes'''
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8050)
+    app.run_server(debug=True, port=8000)
