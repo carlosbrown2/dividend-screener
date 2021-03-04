@@ -9,7 +9,7 @@ def get_master_sheet(url, sheets):
     with open(filename,'wb') as d:
         d.write(file.content)
     #read in the dividend stock data
-    df = pd.read_excel(filename,sheet_name=sheets)
+    df = pd.read_excel(filename,sheet_name=sheets, engine='openpyxl')
     df_list = [df.get(sheet) for sheet in sheets]
     return df_list
 
