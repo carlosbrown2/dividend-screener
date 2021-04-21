@@ -107,8 +107,9 @@ app.layout = html.Div(children=[
         ], width=9), # Price Charts
     ], justify='end'),
     html.H5('Data Sources'),
-    html.Div('DRIP Dividend Champions Spreadsheet'),
-    html.Div('Yahoo Finance')
+    dcc.Link('DRIP Dividend Champions Spreadsheet', href='https://www.dripinvesting.org/Tools/Tools.asp'),
+    html.Br(),
+    dcc.Link('Yahoo Finance', href='https://finance.yahoo.com/')
 ], className='content')
 
 @app.callback(Output('stocks', 'data'),
