@@ -1,0 +1,69 @@
+.graphcards {
+    margin-top: 0.5rem;
+    padding-right: 0.25rem;
+    padding-left: 0rem;
+}
+
+.content {
+    padding: 2rem;
+}
+
+.dropdownrow {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.fourrowcard_center {
+    margin-right: 0.25rem;
+    margin-left: 0.25rem;
+    padding: 0;
+}
+
+.divyield {
+    margin-right: 0.25rem;
+    padding: 0;
+}
+
+.fiveten {
+    margin-left: 0.25rem;
+    padding: 0;
+}
+
+.debtequity {
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
+.payout {
+    margin-top: 1rem;
+    padding: 0;
+}
+
+.inputtitles {
+    margin-left: 0rem;
+    padding: 0rem;
+    text-align: right;
+}
+
+.filterinputs {
+    padding-left: 0rem;
+    margin-left: 0rem;
+}
+
+.titlespacer {
+    margin: 0.5rem;
+}
+
+.button {
+    margin-bottom: 0.5rem;
+}
+
+.inputs {
+    width: 8rem;
+}
+
+.filtertitles {
+    width: 9rem;
+    margin-right: 10rem;
+    margin-left: 0.5rem;
+}
