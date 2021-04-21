@@ -41,6 +41,7 @@ class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
 
+# Add resource to the api
 api.add_resource(HelloWorld, '/hello')
 
 app.layout = html.Div(children=[
