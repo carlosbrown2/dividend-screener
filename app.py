@@ -48,7 +48,7 @@ app.layout = html.Div(children=[
     dcc.Store(id='stocks', storage_type='session'),
     dcc.Interval(
             id='interval-component',
-            interval=3575*1000, # About every hour, fire
+            interval=1740*1000, # About every half hour, fire
     ),
     html.Div(id='no-show', style={'display':'none'}),
     html.H1(children='Dividend Dashboard'),
