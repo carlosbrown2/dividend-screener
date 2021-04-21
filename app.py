@@ -20,6 +20,8 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
 import plotly.express as px
+from flask_restful import Resource, Api
+from requests import get
 from static import dropdown, company_name, divyield, pe, chowder, fiveten
 from static import debtequity, payout, getstocks, scatter_graph, inside
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -32,8 +34,22 @@ start = datetime.datetime.now()
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB])
 server = app.server
+api = Api(server)
+
+# Set GET endpoint for interval ping
+class HelloWorld(Resource):
+    def get(self):
+        return {'hello': 'world'}
+
+api.add_resource(HelloWorld, '/hello')
+
 app.layout = html.Div(children=[
     dcc.Store(id='stocks', storage_type='session'),
+    dcc.Interval(
+            id='interval-component',
+            interval=3575*1000, # About every hour, fire
+    ),
+    html.Div(id='no-show', style={'display':'none'}),
     html.H1(children='Dividend Dashboard'),
     dbc.Row([
         dbc.Col([
@@ -215,10 +231,13 @@ def update_dropdown(minyield, maxdebt, maxpayout, data):
     ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
     return ticker_dict
 
-# @app.callback(Output(),
-#             [Input(), Input(), Input()])
-# def update_filtered_stocks(input):
-#     '''Update outputs based on filter changes'''
+@app.callback(Output('no-show', 'children'),
+            [Input('interval-component', 'n_intervals')])
+def interval_get(n_intervals):
+    # GET response from REST api to keep app awake
+    response = get('https://divscreener.herokuapp.com/hello')
+    return 'Success!'
+
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8000)
+    app.run_server(debug=False, port=8000)
