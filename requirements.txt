@@ -34,4 +34,4 @@ six==1.15.0
 urllib3==1.26.2
 Werkzeug==1.0.1
 xlrd==2.0.1
-yfinance==0.1.55
+yfinance==0.1.63

@@ -60,7 +60,7 @@ app.layout = html.Div(children=[
         dbc.Col([
                 html.Div('Minimum Yield % '),
                 html.Div('Max Payout % ', className='titlespacer'),
-                html.Div('Max Debt/Equity % ', className='titlespacer')
+                html.Div('Max Debt/Capital % ', className='titlespacer')
         ], className='inputtitles'),
         html.Div([
             dcc.Input(
@@ -138,7 +138,7 @@ def get_stocks(n_clicks):
     # Add feature for 1 year DGR over 3 yr DGR
     df['1/3 A/D'] = df['DGR 1Y'] / df['DGR 3Y']
     
-    # Remove non-string Tickers
+    # Remove non-string Symbols
     exclude_list = ['Averages for All', 'Communication Services', 'Consumer Discretionary', 'Consumer Staples', 'Energy']
     df = df.loc[~df.Company.isin(exclude_list), :]
     # Reduce length of Industry name
@@ -150,11 +150,10 @@ def get_stocks(n_clicks):
     df.Industry = df.Industry.apply(lambda x: industry_map_dict.get(x) if x in key_list else x)
     
     # Drop NA values
-    df = df.dropna(subset=['Company', 'Ticker'])
+    df = df.dropna(subset=['Company', 'Symbol'])
     # Add new columns
     df = df.assign(updated = False)
     # df['P/E'] = 0
-    df.to_csv('inspection.csv')
     return df.to_json(orient='records')
 
 @app.callback([Output('yield-div', 'children'), Output('pe-div', 'children'), Output('chowder-div', 'children'),
@@ -182,26 +181,27 @@ def update_cards(ticker, data):
     print('Start date is {}'.format(start_date))
     # Get price data
     dat = yf.download(ticker_list_clean, start=start_date, end=quote_date, group_by='ticker')
+    print(dat)
     # df_dat = dat.iloc[[-2]].melt()
     # Drop rows with nan values
     dat.dropna(inplace=True)
     # df_dat = pd.pivot_table(df_dat, index='variable_0', columns='variable_1', values='value', aggfunc='mean')
     # Adjust dividend yield and price based on current up-to-date price
-    df.loc[df.Ticker == ticker, 'Div Yield'] = df.loc[df.Ticker == ticker, 'Div Yield']*dat.loc[dat.index[-1], 'Close']/df.loc[df.Ticker == ticker, 'Price']
-    df.loc[df.Ticker == ticker, 'P/E'] = df.loc[df.Ticker == ticker, 'P/E']*dat.loc[dat.index[-1], 'Close']/df.loc[df.Ticker == ticker, 'Price']
+    df.loc[df.Symbol == ticker, 'Div Yield'] = df.loc[df.Symbol == ticker, 'Div Yield']*dat.loc[dat.index[-1], 'Close']/df.loc[df.Symbol == ticker, 'Price']
+    df.loc[df.Symbol == ticker, 'P/E'] = df.loc[df.Symbol == ticker, 'P/E']*dat.loc[dat.index[-1], 'Close']/df.loc[df.Symbol == ticker, 'Price']
     # df['P/E'] = df.apply(lambda row: row['TTM P/E']*row['Close']/row['Price'],axis=1)
-    # df.loc[df.Ticker == ticker, 'updated'] = True
+    # df.loc[df.Symbol == ticker, 'updated'] = True
         
-    divyield_ret = df.loc[df.Ticker == ticker, 'Div Yield'].round(2).values
-    pe_ret = df.loc[df.Ticker == ticker, 'P/E'].round(2)
-    chowder_ret = df.loc[df.Ticker == ticker, 'Chowder Number'].round(2)
-    fiveten_ret = df.loc[df.Ticker == ticker, '5/10 A/D*'].round(2)
-    debtcapital_ret = df.loc[df.Ticker == ticker, 'Debt/Capital'].round(2)
-    payout_ret = df.loc[df.Ticker == ticker, 'Payout'].round(2)
+    divyield_ret = df.loc[df.Symbol == ticker, 'Div Yield'].round(2).values
+    pe_ret = df.loc[df.Symbol == ticker, 'P/E'].round(2)
+    chowder_ret = df.loc[df.Symbol == ticker, 'Chowder Number'].round(2)
+    fiveten_ret = df.loc[df.Symbol == ticker, '5/10 A/D*'].round(2)
+    debtcapital_ret = df.loc[df.Symbol == ticker, 'Debt/Capital'].round(2)
+    payout_ret = df.loc[df.Symbol == ticker, 'Payout'].round(2)
     inside_ret = 'N/A'
-    sector_ret = 'Sector : {}'.format(df.loc[df.Ticker == ticker, 'Sector'].values[0])
-    industry_ret = 'Industry : {}'.format(df.loc[df.Ticker == ticker, 'Industry'].values[0])
-    noyrs_ret = 'No. Years : {}'.format(df.loc[df.Ticker == ticker, 'No Years'].values[0])
+    sector_ret = 'Sector : {}'.format(df.loc[df.Symbol == ticker, 'Sector'].values[0])
+    industry_ret = 'Industry : {}'.format(df.loc[df.Symbol == ticker, 'Industry'].values[0])
+    noyrs_ret = 'No. Years : {}'.format(df.loc[df.Symbol == ticker, 'No Years'].values[0])
 
     return divyield_ret, pe_ret, chowder_ret, fiveten_ret, \
         debtcapital_ret, payout_ret, sector_ret, industry_ret, noyrs_ret, inside_ret
@@ -214,7 +214,7 @@ def update_scatter(data):
     if data is None:
         raise PreventUpdate
     df = pd.DataFrame.from_dict(json.loads(data))
-    fig_scatter = px.scatter(df, x='No Years', y='Div Yield', color='Industry', hover_data=['Company', 'Ticker'])
+    fig_scatter = px.scatter(df, x='No Years', y='Div Yield', color='Industry', hover_data=['Company', 'Symbol'])
     return fig_scatter
 
 
@@ -229,8 +229,8 @@ def update_dropdown(minyield, maxdebt, maxpayout, data):
         raise PreventUpdate
     df = pd.read_json(data, orient='records')
 
-    df = df.loc[(df['Div Yield']>minyield) & (df['Payout']<maxpayout) & (df['Debt/Capital']<maxdebt/100),:]
-    ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Ticker.values)]
+    df = df.loc[(df['Div Yield']>minyield) & (df['Payout']<maxpayout) & (df['Debt/Capital']<maxdebt),:]
+    ticker_dict = [{'label':label , 'value':value} for label, value in zip(df.Company.values, df.Symbol.values)]
     return ticker_dict
 
 @app.callback(Output('no-show', 'children'),
