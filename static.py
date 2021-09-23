@@ -63,7 +63,7 @@ fiveten = dbc.Card(
 
 debtequity = dbc.Card(
     [
-        dbc.CardHeader('Debt/Equity'),
+        dbc.CardHeader('Debt/Capital'),
         dbc.CardBody(
         [
             html.Div(id='debtequity-div', children=' ')
