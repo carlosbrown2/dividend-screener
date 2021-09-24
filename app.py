@@ -60,7 +60,7 @@ app.layout = html.Div(children=[
         dbc.Col([
                 html.Div('Minimum Yield % '),
                 html.Div('Max Payout % ', className='titlespacer'),
-                html.Div('Max Debt/Capital % ', className='titlespacer')
+                html.Div('Max Debt/Capital', className='titlespacer')
         ], className='inputtitles'),
         html.Div([
             dcc.Input(
@@ -196,7 +196,7 @@ def update_cards(ticker, data):
     pe_ret = df.loc[df.Symbol == ticker, 'P/E'].round(2)
     chowder_ret = df.loc[df.Symbol == ticker, 'Chowder Number'].round(2)
     fiveten_ret = df.loc[df.Symbol == ticker, '5/10 A/D*'].round(2)
-    debtcapital_ret = df.loc[df.Symbol == ticker, 'Debt/Capital'].round(2)
+    debtcapital_ret = df.loc[df.Symbol == ticker, 'Debt/Capital']
     payout_ret = df.loc[df.Symbol == ticker, 'Payout'].round(2)
     inside_ret = 'N/A'
     sector_ret = 'Sector : {}'.format(df.loc[df.Symbol == ticker, 'Sector'].values[0])
