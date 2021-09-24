@@ -41,7 +41,6 @@ def clean_data(df_list):
 
     df = df.assign(EPS = df.loc[:,'Price'] / df.loc[:,'P/E'])
     df = df.assign(Payout = df['Current Div'] * df['Payouts/ Year'] / df['EPS'] * 100)
-    df['Debt/Capital'] = df['Debt/Capital'] * 100
     return df
 
 #calculate 5/10 A/D* for missing values

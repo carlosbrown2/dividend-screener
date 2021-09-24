@@ -79,7 +79,7 @@ app.layout = html.Div(children=[
             dcc.Input(
                     id="maxdebt",
                     type='number',
-                    value=75,
+                    value=0.75,
                     className='inputs'
                 )
             
