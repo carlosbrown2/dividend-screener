@@ -19,7 +19,7 @@ idna==2.10
 itsdangerous==1.1.0
 jdcal==1.4.1
 Jinja2==2.11.2
-lxml==4.6.2
+lxml==4.6.5
 MarkupSafe==1.1.1
 multitasking==0.0.9
 numpy==1.19.5
